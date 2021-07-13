@@ -1,0 +1,41 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: This template will create an EC2 instance with all networks.
+ 
+
+Parameters:
+  KeyNameParameter:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances. Linked to AWS Parameter
+    Type: AWS::EC2::KeyPair::KeyName # Resource identifier
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+ 
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+   # Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+ 
+
+Resources:
+  MyEC2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: !Ref LatestAmiId
+      SubnetId: !ImportValue SampleNetworkCrossStack-SubnetID
+      SecurityGroupIds:
+        - !ImportValue SampleNetworkCrossStack-SecurityGroupID
+      InstanceType: !Ref InstanceTypeParameter
+      KeyName: !Ref KeyNameParameter
+  MyEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref MyEC2Instance #Logical name of an AWS::EC2::Instance resource
+
+  
