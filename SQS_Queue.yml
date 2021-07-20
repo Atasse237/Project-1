@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS CloudFormation Template to create and apply an SQS Policy
+
+Parameters:
+  DemoQueueName:
+    Type: String
+    Description: Queue Name
+    Default: demo-queue
+  UserArn:
+    Type: String
+    Description: User to which SQS will allow perfoming actions
+    Default: arn:aws:iam::123456789012:user/Bob
+  
+
+Resources:
+  DemoQueue: 
+    Type: AWS::SQS::Queue
+    Properties: 
+      QueueName: !Ref DemoQueueName
+  DemoQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Id: MyDemoQueuePolicy
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Send_Permission
+            Effect: Allow
+            Principal:
+              AWS: !Ref UserArn
+            Action:
+              - sqs:SendMessage
+            Resource: !GetAtt DemoQueue.Arn
+      Queues:
+        - !Ref DemoQueue
